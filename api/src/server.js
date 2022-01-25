@@ -1,26 +1,32 @@
 /** GIA NOTES
  *
  * Use the code below to start a bare-bone express web server
+ */
+import { graphqlHTTP } from "express-graphql";
+import { schema, rootValue } from "./schema";
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import morgan from "morgan";
 
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import morgan from 'morgan';
-
-import * as config from './config';
+import * as config from "./config";
 
 async function main() {
   const server = express();
   server.use(cors());
-  server.use(morgan('dev'));
+  server.use(morgan("dev"));
   server.use(bodyParser.urlencoded({ extended: false }));
   server.use(bodyParser.json());
-  server.use('/:fav.ico', (req, res) => res.sendStatus(204));
+  server.use("/:fav.ico", (req, res) => res.sendStatus(204));
 
-  // Example route
-  server.use('/', (req, res) => {
-    res.send('Hello World');
-  });
+  server.use(
+    "/",
+    graphqlHTTP({
+      schema: schema,
+      rootValue: rootValue,
+      graphiql: true,
+    })
+  );
 
   // This line rus the server
   server.listen(config.port, () => {
@@ -29,16 +35,3 @@ async function main() {
 }
 
 main();
-
-*/
-
-import { graphql } from "graphql";
-import { rootValue, schema } from "./schema";
-
-const executeGraphQLRequest = async (request) => {
-  const response = await graphql({schema, rootValue, source: request});
-  console.log(response.data);
-};
-
-
-executeGraphQLRequest(process.argv[2])
