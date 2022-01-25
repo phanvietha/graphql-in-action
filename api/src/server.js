@@ -31,3 +31,14 @@ async function main() {
 main();
 
 */
+
+import { graphql } from "graphql";
+import { rootValue, schema } from "./schema";
+
+const executeGraphQLRequest = async (request) => {
+  const response = await graphql({schema, rootValue, source: request});
+  console.log(response.data);
+};
+
+
+executeGraphQLRequest(process.argv[2])
