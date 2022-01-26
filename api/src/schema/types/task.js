@@ -6,6 +6,7 @@ import {
   GraphQLNonNull,
   GraphQLList,
 } from "graphql";
+import User from "./user";
 
 export const Task = new GraphQLObjectType({
   name: "Task",
@@ -15,7 +16,7 @@ export const Task = new GraphQLObjectType({
     },
     createdAt: {
       type: new GraphQLNonNull(GraphQLString),
-    //   resolve: (source) => source.created_at,
+        resolve: (source) => source.created_at,
     },
     content: {
       type: new GraphQLNonNull(GraphQLString),
@@ -24,10 +25,16 @@ export const Task = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(GraphQLString))
       ),
-      // resolve: (source) => source.tags.split(',')
+      resolve: (source) => source.tags.split(',')
     },
     approachCount: {
       type: new GraphQLNonNull(GraphQLInt),
+    },
+    author: {
+      type: new GraphQLNonNull(User),
+      resolve: (source, args, { pgApi }) => {
+        return pgApi.userInfo(source.userId);
+      },
     },
   },
 });

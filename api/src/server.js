@@ -10,10 +10,11 @@ import cors from "cors";
 import morgan from "morgan";
 
 import * as config from "./config";
-import pgClient from './db/pg-client';
+import pgClient from "./db/pg-client";
+import pgApiWrapper from "./db/pg-api";
 
 async function main() {
-  const { pgPool } = await pgClient();
+  const pgApi = await pgApiWrapper();
   const server = express();
   server.use(cors());
   server.use(morgan("dev"));
@@ -26,9 +27,22 @@ async function main() {
     graphqlHTTP({
       schema: schema,
       context: {
-        pgPool,
+        pgApi,
       },
       graphiql: true,
+      // Generic error
+      customFormatErrorFn: (err) => {
+        const errorReport = {
+          message: err.message,
+          locations: err.locations,
+          stack: err.stack ? err.stack.split("\n") : [],
+          path: err.path,
+        };
+        // console.error("GraphQL Error", errorReport);
+        return config.isDev
+          ? errorReport
+          : { message: "Oops! Something went wrong! :(" };
+      },
     })
   );
 
