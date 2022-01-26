@@ -14,9 +14,14 @@ const queryType = new GraphQLObjectType({
   fields: {
     currentTime: {
       type: GraphQLString,
+      // Resolver function can return promise
       resolve: () => {
-        const isoString = new Date().toISOString();
-        return isoString.slice(11, 19);
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            const isoString = new Date().toISOString();
+            resolve(isoString.slice(11, 19));
+          }, 5000);
+        });
       },
     },
     // sumNumbersInRange: {
@@ -39,7 +44,7 @@ const queryType = new GraphQLObjectType({
     //   },
     // },
     // Demo partial data with non null
-     sumNumbersInRange: {
+    sumNumbersInRange: {
       type: NumbersInRange,
       args: {
         begin: {
