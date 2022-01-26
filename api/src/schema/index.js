@@ -5,58 +5,26 @@ import {
   GraphQLInt,
   GraphQLNonNull,
   printSchema,
+  GraphQLList,
 } from "graphql";
 import { numbersInRangeObject } from "../utils";
 import { NumbersInRange } from "./types";
+import { Task } from "./types/task";
 
 const queryType = new GraphQLObjectType({
   name: "Query",
   fields: {
-    currentTime: {
-      type: GraphQLString,
-      // Resolver function can return promise
-      resolve: () => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            const isoString = new Date().toISOString();
-            resolve(isoString.slice(11, 19));
-          }, 5000);
-        });
-      },
-    },
-    // sumNumbersInRange: {
-    //   type: new GraphQLNonNull(GraphQLInt),
-    //   args: {
-    //     begin: {
-    //       type: new GraphQLNonNull(GraphQLInt),
-    //     },
-    //     end: {
-    //       type: new GraphQLNonNull(GraphQLInt),
-    //     },
-    //   },
-    //   resolve: (source, { begin, end }) => {
-    //     console.log(source);
-    //     let sum = 0;
-    //     for (let i = begin; i <= end; i++) {
-    //       sum += i;
-    //     }
-    //     return sum;
-    //   },
-    // },
-    // Demo partial data with non null
-    sumNumbersInRange: {
-      type: NumbersInRange,
-      args: {
-        begin: {
-          type: new GraphQLNonNull(GraphQLInt),
-        },
-        end: {
-          type: new GraphQLNonNull(GraphQLInt),
-        },
-      },
-      resolve: (source, { begin, end }) => {
-        console.log(source);
-        return numbersInRangeObject(begin, end);
+    taskMainList: {
+      type: new GraphQLList(new GraphQLNonNull(Task)),
+      resolve: async (source, args, { pgPool }) => {
+        const pgResp = await pgPool.query(`
+          SELECT *
+          FROM azdev.tasks
+          WHERE is_private = FALSE
+          ORDER BY created_at DESC
+          LIMIT 100
+        `);
+        return pgResp.rows;
       },
     },
   },
