@@ -11,6 +11,16 @@ const pgApiWrapper = async () => {
       const pgResp = await pgQuery(sqls.tasksLatest);
       return pgResp.rows;
     },
+    tasksByTypes: async (types) => {
+      const results = types.map(async (type) => {
+        if (type === "latest") {
+          const pgResp = await pgQuery(sqls.tasksLatest);
+          return pgResp.rows;
+        }
+        throw Error("Unsupported type");
+      });
+      return Promise.all(results);
+    },
     userInfo: async (userId) => {
       const pgResp = await pgQuery(sqls.usersFromIds, { $1: [userId] });
       console.log(pgResp.rows[0], "what");
