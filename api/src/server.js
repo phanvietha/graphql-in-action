@@ -26,6 +26,7 @@ async function main() {
   server.use("/", (req, res) => {
     const loaders = {
       users: new DataLoader((userIds) => pgApi.usersInfo(userIds)),
+      approachLists: new DataLoader((taskIds) => pgApi.approachLists(taskIds)),
     };
     graphqlHTTP({
       schema: schema,

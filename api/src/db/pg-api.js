@@ -22,6 +22,14 @@ const pgApiWrapper = async () => {
         pgResp.rows.find((row) => userId === row.id)
       );
     },
+    approachLists: async (taskIds) => {
+      const pgResp = await pgQuery(sqls.approachesForTaskIds, {
+        $1: taskIds,
+      });
+      return taskIds.map((taskId) =>
+        pgResp.rows.filter((row) => taskId === row.taskId)
+      );
+    },
     approachList: async (taskId) => {
       const pgResp = await pgQuery(sqls.approachesForTaskIds, {
         $1: [taskId],
