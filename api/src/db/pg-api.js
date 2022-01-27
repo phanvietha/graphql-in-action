@@ -13,8 +13,14 @@ const pgApiWrapper = async () => {
     },
     userInfo: async (userId) => {
       const pgResp = await pgQuery(sqls.usersFromIds, { $1: [userId] });
-      console.log(pgResp.rows[0], 'what')
+      console.log(pgResp.rows[0], "what");
       return pgResp.rows[0];
+    },
+    approachList: async (taskId) => {
+      const pgResp = await pgQuery(sqls.approachesForTaskIds, {
+        $1: [taskId],
+      });
+      return pgResp.rows;
     },
   };
 };
