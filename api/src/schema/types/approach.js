@@ -4,11 +4,13 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLNonNull,
+  GraphQLList,
 } from "graphql";
 
 import User from "./user";
 import SearchResultItem from "./search-result-item";
 import Task from "./task";
+import ApproachDetail from "./approach-detail";
 
 const Approach = new GraphQLObjectType({
   name: "Approach",
@@ -24,12 +26,18 @@ const Approach = new GraphQLObjectType({
     },
     author: {
       type: new GraphQLNonNull(User),
-      resolve: (source, args, { loaders }) =>
-        loaders.users.load(source.userId),
+      resolve: (source, args, { loaders }) => loaders.users.load(source.userId),
     },
     task: {
       type: new GraphQLNonNull(Task),
       resolve: (source, args, { loaders }) => loaders.tasks.load(source.taskId),
+    },
+    detailList: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ApproachDetail))
+      ),
+      resolve: (source, args, { loaders }) =>
+        loaders.detailLists.load(source.id),
     },
   }),
 });

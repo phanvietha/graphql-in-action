@@ -13,9 +13,11 @@ import * as config from "./config";
 import pgClient from "./db/pg-client";
 import DataLoader from "dataloader";
 import pgApiWrapper from "./db/pg-api";
+import mongoApiWrapper from "./db/mongo-api";
 
 async function main() {
   const pgApi = await pgApiWrapper();
+  const mongoApi = await mongoApiWrapper();
   const server = express();
   server.use(cors());
   server.use(morgan("dev"));
@@ -32,7 +34,11 @@ async function main() {
       searchResults: new DataLoader((searchTerms) =>
         pgApi.searchResults(searchTerms)
       ),
+      detailLists: new DataLoader((approachIds) =>
+        mongoApi.detailLists(approachIds)
+      ),
     };
+
     graphqlHTTP({
       schema: schema,
       context: {
