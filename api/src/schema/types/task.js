@@ -46,3 +46,5 @@ export const Task = new GraphQLObjectType({
     },
   },
 });
+
+export default Task;

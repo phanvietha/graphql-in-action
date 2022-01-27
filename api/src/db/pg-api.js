@@ -30,11 +30,14 @@ const pgApiWrapper = async () => {
         pgResp.rows.filter((row) => taskId === row.taskId)
       );
     },
-    approachList: async (taskId) => {
-      const pgResp = await pgQuery(sqls.approachesForTaskIds, {
-        $1: [taskId],
+    tasksInfo: async (taskIds) => {
+      const pgResp = await pgQuery(sqls.tasksFromIds, {
+        $1: taskIds,
+        $2: null,
       });
-      return pgResp.rows;
+      return taskIds.map((taskId) =>
+        pgResp.rows.find((row) => taskId == row.id)
+      );
     },
   };
 };
