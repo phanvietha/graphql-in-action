@@ -33,8 +33,8 @@ export const Task = new GraphQLObjectType({
     },
     author: {
       type: new GraphQLNonNull(User),
-      resolve: (source, args, { pgApi }) => {
-        return pgApi.userInfo(source.userId);
+      resolve: (source, args, { pgApi,loaders }) => {
+        return loaders.users.load(source.userId);
       },
     },
     approachList: {

@@ -11,6 +11,7 @@ import morgan from "morgan";
 
 import * as config from "./config";
 import pgClient from "./db/pg-client";
+import DataLoader from "dataloader";
 import pgApiWrapper from "./db/pg-api";
 
 async function main() {
@@ -22,12 +23,15 @@ async function main() {
   server.use(bodyParser.json());
   server.use("/:fav.ico", (req, res) => res.sendStatus(204));
 
-  server.use(
-    "/",
+  server.use("/", (req, res) => {
+    const loaders = {
+      users: new DataLoader((userIds) => pgApi.usersInfo(userIds)),
+    };
     graphqlHTTP({
       schema: schema,
       context: {
         pgApi,
+        loaders,
       },
       graphiql: true,
       // Generic error
@@ -43,8 +47,8 @@ async function main() {
           ? errorReport
           : { message: "Oops! Something went wrong! :(" };
       },
-    })
-  );
+    })(req, res);
+  });
 
   // This line rus the server
   server.listen(config.port, () => {

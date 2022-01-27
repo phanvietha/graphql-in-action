@@ -16,6 +16,12 @@ const pgApiWrapper = async () => {
       console.log(pgResp.rows[0], "what");
       return pgResp.rows[0];
     },
+    usersInfo: async (userIds) => {
+      const pgResp = await pgQuery(sqls.usersFromIds, { $1: userIds });
+      return userIds.map((userId) =>
+        pgResp.rows.find((row) => userId === row.id)
+      );
+    },
     approachList: async (taskId) => {
       const pgResp = await pgQuery(sqls.approachesForTaskIds, {
         $1: [taskId],

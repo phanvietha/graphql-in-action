@@ -20,7 +20,8 @@ const Approach = new GraphQLObjectType({
     },
     author: {
       type: new GraphQLNonNull(User),
-      resolve: (source, args, { pgApi }) => pgApi.userInfo(source.userId),
+      resolve: (source, args, { pgApi, loaders }) =>
+        loaders.users.load(source.userId),
     },
   },
 });
