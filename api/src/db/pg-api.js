@@ -49,6 +49,17 @@ const pgApiWrapper = async () => {
         pgResp.rows.find((row) => taskId == row.id)
       );
     },
+    searchResults: async (searchTerms) => {
+      const results = searchTerms.map(async (searchTerm) => {
+        const pgResp = await pgQuery(sqls.searchResults, {
+          $1: searchTerm,
+          $2: null,
+        });
+        console.log(pgResp.rows.slice(0, 1), 'hahah')
+        return pgResp.rows.slice(0, 1);
+      });
+      return Promise.all(results);
+    },
   };
 };
 

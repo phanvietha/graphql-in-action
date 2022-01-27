@@ -29,11 +29,13 @@ async function main() {
       approachLists: new DataLoader((taskIds) => pgApi.approachLists(taskIds)),
       tasks: new DataLoader((taskIds) => pgApi.tasksInfo(taskIds)),
       tasksByTypes: new DataLoader((types) => pgApi.tasksByTypes(types)),
+      searchResults: new DataLoader((searchTerms) =>
+        pgApi.searchResults(searchTerms)
+      ),
     };
     graphqlHTTP({
       schema: schema,
       context: {
-        pgApi,
         loaders,
       },
       graphiql: true,

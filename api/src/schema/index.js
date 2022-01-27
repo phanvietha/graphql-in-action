@@ -6,4 +6,4 @@ export const schema = new GraphQLSchema({
   query: QueryType,
 });
  
-console.log(printSchema(schema));
+// console.log(printSchema(schema));

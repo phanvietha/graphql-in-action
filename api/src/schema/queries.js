@@ -31,17 +31,17 @@ const QueryType = new GraphQLObjectType({
         return loaders.tasks.load(args.id);
       },
     },
-    // search: {
-    //   type: new GraphQLNonNull(
-    //     new GraphQLList(new GraphQLNonNull(SearchResultItem))
-    //   ),
-    //   args: {
-    //     term: { type: new GraphQLNonNull(GraphQLString) },
-    //   },
-    //   resolve: async (source, args, { loaders }) => {
-    //     return loaders.searchResults.load(args.term);
-    //   },
-    // },
+    search: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(SearchResultItem))
+      ),
+      args: {
+        term: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (source, args, { loaders }) => {
+        return loaders.searchResults.load(args.term);
+      },
+    },
   },
 });
 
