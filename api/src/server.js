@@ -18,6 +18,12 @@ import mongoApiWrapper from "./db/mongo-api";
 async function main() {
   const pgApi = await pgApiWrapper();
   const mongoApi = await mongoApiWrapper();
+
+  const mutators = {
+    ...pgApi.mutators,
+    ...mongoApi.mutators,
+  };
+
   const server = express();
   server.use(cors());
   server.use(morgan("dev"));
@@ -25,14 +31,28 @@ async function main() {
   server.use(bodyParser.json());
   server.use("/:fav.ico", (req, res) => res.sendStatus(204));
 
-  server.use("/", (req, res) => {
+  server.use("/", async (req, res) => {
+    const authToken =
+      req && req.headers && req.headers.authorization
+        ? req.headers.authorization.slice(7) // "Bearer "
+        : null;
+    const currentUser = await pgApi.userFromAuthToken(authToken);
+    if (authToken && !currentUser) {
+      return res.status(401).send({
+        errors: [{ message: "Invalid access token" }],
+      });
+    }
+    console.log('yay')
+
     const loaders = {
       users: new DataLoader((userIds) => pgApi.usersInfo(userIds)),
       approachLists: new DataLoader((taskIds) => pgApi.approachLists(taskIds)),
-      tasks: new DataLoader((taskIds) => pgApi.tasksInfo(taskIds)),
+      tasks: new DataLoader((taskIds) =>
+        pgApi.tasksInfo({ taskIds, currentUser })
+      ),
       tasksByTypes: new DataLoader((types) => pgApi.tasksByTypes(types)),
       searchResults: new DataLoader((searchTerms) =>
-        pgApi.searchResults(searchTerms)
+        pgApi.searchResults({ searchTerms, currentUser })
       ),
       detailLists: new DataLoader((approachIds) =>
         mongoApi.detailLists(approachIds)
@@ -43,8 +63,11 @@ async function main() {
       schema: schema,
       context: {
         loaders,
+        mutators,
       },
-      graphiql: true,
+      graphiql: {
+        headerEditorEnabled: true,
+      },
       // Generic error
       customFormatErrorFn: (err) => {
         const errorReport = {

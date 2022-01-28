@@ -1,3 +1,4 @@
+import { randomString } from "../utils";
 import pgClient from "./pg-client";
 import sqls from "./sqls";
 
@@ -40,25 +41,60 @@ const pgApiWrapper = async () => {
         pgResp.rows.filter((row) => taskId === row.taskId)
       );
     },
-    tasksInfo: async (taskIds) => {
+    tasksInfo: async ({ taskIds, currentUser }) => {
       const pgResp = await pgQuery(sqls.tasksFromIds, {
         $1: taskIds,
-        $2: null,
+        $2: currentUser ? currentUser.id : null,
       });
       return taskIds.map((taskId) =>
         pgResp.rows.find((row) => taskId == row.id)
       );
     },
-    searchResults: async (searchTerms) => {
+    searchResults: async ({ searchTerms, currentUser }) => {
       const results = searchTerms.map(async (searchTerm) => {
         const pgResp = await pgQuery(sqls.searchResults, {
           $1: searchTerm,
-          $2: null,
+          $2: currentUser ? currentUser.id : null,
         });
-        console.log(pgResp.rows.slice(0, 1), 'hahah')
+        console.log(pgResp.rows.slice(0, 1), "hahah");
         return pgResp.rows.slice(0, 1);
       });
       return Promise.all(results);
+    },
+    userFromAuthToken: async (authToken) => {
+      if (!authToken) {
+        return null;
+      }
+      const pgResp = await pgQuery(sqls.userFromAuthToken, {
+        $1: authToken,
+      });
+      return pgResp.rows[0];
+    },
+
+    mutators: {
+      userCreate: async ({ input }) => {
+        const payload = { errors: [] };
+        if (input.password.length < 6) {
+          payload.errors.push({
+            message: "Use a stronger password",
+          });
+        }
+        if (payload.errors.length === 0) {
+          const authToken = randomString();
+          const pgResp = await pgQuery(sqls.userInsert, {
+            $1: input.username.toLowerCase(),
+            $2: input.password,
+            $3: input.firstName,
+            $4: input.lastName,
+            $5: authToken,
+          });
+          if (pgResp.rows[0]) {
+            payload.user = pgResp.rows[0];
+            payload.authToken = authToken;
+          }
+        }
+        return payload;
+      },
     },
   };
 };

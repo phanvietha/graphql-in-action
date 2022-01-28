@@ -61,6 +61,7 @@ const mongoApiWrapper = async () => {
         // ·-·-·
       });
     },
+    mutators: {},
   };
 };
 
