@@ -1,8 +1,7 @@
 import { GraphQLNonNull, GraphQLObjectType } from "graphql";
-import sqls from "../db/sqls";
-import { randomString } from "../utils";
 import UserInput from "./types/input-user";
 import UserPayload from "./types/payload-user";
+import AuthInput from './types/input-auth';
 
 const MutationType = new GraphQLObjectType({
   name: "Mutation",
@@ -14,6 +13,15 @@ const MutationType = new GraphQLObjectType({
       },
       resolve: async (source, { input }, { mutators }) => {
         return mutators.userCreate({ input });
+      },
+    },
+    userLogin: {
+      type: new GraphQLNonNull(UserPayload),
+      args: {
+        input: { type: new GraphQLNonNull(AuthInput) },
+      },
+      resolve: async (source, { input }, { mutators }) => {
+        return mutators.userLogin({ input });
       },
     },
   }),
